@@ -191,3 +191,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     implementation(libs.androidx.compose.ui.tooling)
 }
+
+// 强制设置 Gradle 构建 JVM 最大内存为 14g
+gradle.startParameter.maxHeapSize = "14g"
