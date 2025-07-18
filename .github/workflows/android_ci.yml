@@ -38,6 +38,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew buildGenericRelease
 
+      - name: List all APKs
+        run: find . -name '*.apk'
+
       - name: Find and upload all seal APKs
         run: |
           mkdir -p found_apks

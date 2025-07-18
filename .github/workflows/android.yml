@@ -44,6 +44,9 @@ jobs:
       - name: Build with Gradle and tee log
         run: gradle assembleRelease 2>&1 | tee build.log
 
+      - name: List all APKs
+        run: find . -name '*.apk'
+
       - name: Find and upload all seal APKs
         run: |
           mkdir -p found_apks
