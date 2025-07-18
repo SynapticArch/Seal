@@ -62,6 +62,23 @@ jobs:
           if-no-files-found: error
           retention-days: 20
 
+      - name: Get timestamp and short sha
+        id: timestamp
+        run: |
+          echo "repo_name=$(basename ${{ github.repository }})" >> $GITHUB_OUTPUT
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Automatic release
+        if: success()
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ steps.timestamp.outputs.timestamp }}
+          prerelease: false
+          title: "${{ steps.timestamp.outputs.repo_name }}-${{ steps.timestamp.outputs.short_sha }} Release"
+          files: app/build/outputs/apk/release/*-signed.apk
+
       - name: Install node dependencies for log upload
         run: |
           cd .github/workflows
