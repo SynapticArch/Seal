@@ -44,12 +44,30 @@ jobs:
       - name: Build with Gradle and tee log
         run: gradle assembleRelease 2>&1 | tee build.log
 
-      - name: Sign app APK
-        id: sign_app
+      - name: Decode keystore (from secrets, recommended)
+        if: env.KEYSTORE_BASE64 != null && env.KEYSTORE_BASE64 != ''
+        run: |
+          mkdir -p app/build/outputs/apk/release
+          echo "$KEYSTORE_BASE64" | base64 -d > app/build/outputs/apk/release/key.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: Sign app APK (from secrets, recommended)
+        if: env.KEYSTORE_BASE64 != null && env.KEYSTORE_BASE64 != ''
         uses: ilharp/sign-android-release@nightly
         with:
           releaseDir: app/build/outputs/apk/release
-          signingKey: ${{ secrets.SIGNING_KEY }}
+          signingKey: app/build/outputs/apk/release/key.jks
+          keyAlias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Sign app APK (from root jks, fallback)
+        if: env.KEYSTORE_BASE64 == null || env.KEYSTORE_BASE64 == ''
+        uses: ilharp/sign-android-release@nightly
+        with:
+          releaseDir: app/build/outputs/apk/release
+          signingKey: my-release-key.jks
           keyAlias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
